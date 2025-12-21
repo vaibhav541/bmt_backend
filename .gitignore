@@ -1,0 +1,25 @@
+node_modules/
+stored-frames/
+ground-truth/
+*.log
+.env
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+env/
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/
+
+# Package lock (optional - keep if you want reproducible builds)
+# package-lock.json
