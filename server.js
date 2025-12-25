@@ -330,6 +330,42 @@ app.get('/health', (req, res) => {
   });
 });
 
+/**
+ * POST /api/v2/remote-log
+ * Remote logging endpoint for mobile debugging
+ * Receives logs from the frontend and prints them to the server console
+ */
+app.post('/api/v2/remote-log', (req, res) => {
+  try {
+    const { level, message, data, timestamp, userAgent } = req.body;
+    
+    const logPrefix = `[REMOTE ${(level || 'LOG').toUpperCase()}] [${timestamp || new Date().toISOString()}]`;
+    
+    // Color-code based on level
+    if (level === 'error') {
+      console.error('\x1b[31m%s\x1b[0m', logPrefix, message);
+      if (data) {
+        console.error('\x1b[31m%s\x1b[0m', '  Data:', JSON.stringify(data, null, 2));
+      }
+    } else if (level === 'warn') {
+      console.warn('\x1b[33m%s\x1b[0m', logPrefix, message);
+      if (data) {
+        console.warn('\x1b[33m%s\x1b[0m', '  Data:', JSON.stringify(data, null, 2));
+      }
+    } else {
+      console.log('\x1b[36m%s\x1b[0m', logPrefix, message);
+      if (data) {
+        console.log('\x1b[36m%s\x1b[0m', '  Data:', JSON.stringify(data, null, 2));
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error in remote-log:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
