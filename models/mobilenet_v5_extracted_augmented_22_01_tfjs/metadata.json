@@ -1,0 +1,22 @@
+{
+  "model_name": "mobilenetv3_small_100",
+  "input_size": 224,
+  "classes": [
+    "negative",
+    "positive",
+    "unvalid"
+  ],
+  "preprocessing": {
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "description": "MobileNetV3-Small classification model for BMT test strips"
+}
