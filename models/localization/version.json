@@ -1,0 +1,6 @@
+{
+  "name": "yolov5n",
+  "version": "0.0.1",
+  "type": "localization",
+  "classes": ["cassette", "strip"]
+}

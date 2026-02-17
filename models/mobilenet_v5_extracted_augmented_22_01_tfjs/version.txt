@@ -1,0 +1,6 @@
+{
+  "name": "mobilenetv3",
+  "version": "1.0",
+  "type": "classification",
+  "classes": ["negative", "positive", "unvalid"]
+}

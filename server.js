@@ -36,7 +36,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve model files with CORS headers
@@ -362,6 +362,51 @@ app.post('/api/v2/remote-log', (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error in remote-log:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ---- OCR Debug Endpoint ----
+// Accepts crop images + OCR pipeline results from the frontend for offline analysis.
+const DEBUG_OCR_DIR = path.join(STORAGE_DIR, 'debug-ocr');
+if (!fs.existsSync(DEBUG_OCR_DIR)) {
+  fs.mkdirSync(DEBUG_OCR_DIR, { recursive: true });
+}
+
+app.post('/api/v2/debug/ocr', (req, res) => {
+  try {
+    const { sessionId, cropIndex, imageBase64, ocrResult, debugInfo } = req.body;
+
+    if (!sessionId || cropIndex === undefined || !imageBase64) {
+      return res.status(400).json({ success: false, error: 'Missing required fields: sessionId, cropIndex, imageBase64' });
+    }
+
+    // Create session directory
+    const sessionDir = path.join(DEBUG_OCR_DIR, sessionId);
+    if (!fs.existsSync(sessionDir)) {
+      fs.mkdirSync(sessionDir, { recursive: true });
+    }
+
+    // Save the crop image (strip data URL prefix)
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+    const imagePath = path.join(sessionDir, `crop_${cropIndex}.jpg`);
+    fs.writeFileSync(imagePath, imageBuffer);
+
+    // Save OCR result + debug info as JSON
+    const metadata = {
+      cropIndex,
+      timestamp: new Date().toISOString(),
+      ocrResult: ocrResult || null,
+      debugInfo: debugInfo || null,
+    };
+    const jsonPath = path.join(sessionDir, `crop_${cropIndex}_result.json`);
+    fs.writeFileSync(jsonPath, JSON.stringify(metadata, null, 2));
+
+    console.log(`[OCR Debug] Saved crop ${cropIndex} for session ${sessionId} (${imageBuffer.length} bytes)`);
+    res.json({ success: true, sessionId, cropIndex, imagePath });
+  } catch (error) {
+    console.error('Error in debug/ocr:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

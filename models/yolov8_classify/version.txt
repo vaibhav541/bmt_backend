@@ -1,0 +1,6 @@
+{
+  "name": "yolov5n",
+  "version": "1.0",
+  "type": "detection",
+  "classes": ["cassette", "strip"]
+}
