@@ -39,6 +39,10 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Serve OCR test pages
+app.use('/ocr-test-tfjs', express.static(path.join(__dirname, '..', 'ocr-test-tfjs')));
+app.use('/ocr-test-onnx', express.static(path.join(__dirname, '..', 'ocr-conversion', 'webapp')));
+
 // Serve model files with CORS headers
 app.use('/models', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -375,6 +379,15 @@ if (!fs.existsSync(DEBUG_OCR_DIR)) {
 
 app.post('/api/v2/debug/ocr', (req, res) => {
   try {
+    // Handle status-type messages (lightweight logging from mobile)
+    if (req.body.type === 'status' || req.body.type === 'ocrService') {
+      const logLine = JSON.stringify({ ...req.body, receivedAt: new Date().toISOString() });
+      const logPath = path.join(DEBUG_OCR_DIR, 'status.log');
+      fs.appendFileSync(logPath, logLine + '\n');
+      console.log(`[OCR Status] ${req.body.step}`, req.body);
+      return res.json({ success: true });
+    }
+
     const { sessionId, cropIndex, imageBase64, ocrResult, debugInfo } = req.body;
 
     if (!sessionId || cropIndex === undefined || !imageBase64) {
