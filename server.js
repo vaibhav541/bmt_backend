@@ -380,7 +380,7 @@ if (!fs.existsSync(DEBUG_OCR_DIR)) {
 app.post('/api/v2/debug/ocr', (req, res) => {
   try {
     // Handle status-type messages (lightweight logging from mobile)
-    if (req.body.type === 'status' || req.body.type === 'ocrService') {
+    if (req.body.type === 'status' || req.body.type === 'ocrService' || req.body.type === 'ocrOnnx') {
       const logLine = JSON.stringify({ ...req.body, receivedAt: new Date().toISOString() });
       const logPath = path.join(DEBUG_OCR_DIR, 'status.log');
       fs.appendFileSync(logPath, logLine + '\n');
